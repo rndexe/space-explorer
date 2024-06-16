@@ -1,10 +1,7 @@
-import { defineConfig } from "vite";
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
-export default defineConfig((config) => {
+export default defineConfig({
     // ...
-    return {
-        build: {
-            sourcemap: config.mode == "development",
-        },
-    };
+        plugins:[react()],
 });
