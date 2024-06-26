@@ -15,7 +15,7 @@ const tmp = new Object3D();
 const m4 = new Matrix4();
 
 export function Asteroids({ count }) {
-    const { nodes, materials } = useGLTF("/models/asteroids/asteroids_pack_rocky_version.glb");
+    const { nodes, materials } = useGLTF("models/asteroids/asteroids_pack_rocky_version.glb");
 
     const ref = useRef();
 
@@ -74,4 +74,4 @@ export function Asteroids({ count }) {
     );
 }
 
-useGLTF.preload("/models/asteroids/asteroids_pack_rocky_version.glb");
+useGLTF.preload("models/asteroids/asteroids_pack_rocky_version.glb");

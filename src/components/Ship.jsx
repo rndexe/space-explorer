@@ -15,7 +15,7 @@ const _v = new Vector3();
 const _cameraOffset = new Vector3(0, 2.5, 6.0);
 
 export function Ship() {
-    const { nodes, materials } = useGLTF("/models/spaceship/scene.gltf");
+    const { nodes, materials } = useGLTF("models/spaceship/scene.gltf");
 
     const shipRef = useRef();
     const textRef = useRef();
