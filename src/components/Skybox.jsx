@@ -1,9 +1,14 @@
-import { useThree } from "@react-three/fiber";
-import { CubeTextureLoader } from "three";
+import { useThree, useFrame } from "@react-three/fiber";
+import { CubeTextureLoader, Euler } from "three";
 
 export function SkyBox() {
-    const { scene } = useThree();
+    const scene = useThree((state) => state.scene);
 
+    const e = new Euler();
+    useFrame(({ clock }, delta) => {
+        // console.log(scene.background.rotation)
+        scene.backgroundRotation.copy(e.set(clock.getElapsedTime() / 50, clock.getElapsedTime() / 50, 0));
+    });
     const loader = new CubeTextureLoader();
     const texture = loader.load([
         "/textures/ulukai/corona_ft.png",
@@ -16,6 +21,6 @@ export function SkyBox() {
 
     scene.background = texture;
     //scene.backgroundBlurriness = 0;
-    //scene.backgroundIntensity = 0.1;
+    scene.backgroundIntensity = 0.5;
     return null;
 }
