@@ -27,12 +27,8 @@ export default function App() {
                     <Ship />
                 </KeyboardControls>
             </Canvas>
-            {import.meta.env.DEV && (
-                <>
-                    <Loader />
-                    <Stats />
-                </>
-            )}
+            {import.meta.env.DEV && <Stats />}
+            {import.meta.env.PROD && <Loader />}
         </>
     );
 }

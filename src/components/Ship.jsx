@@ -64,7 +64,7 @@ Title: Toon Spaceship
 */
 
 function ShipModel({ ...props }) {
-    const { nodes } = useGLTF("/models/spaceship/scene.gltf");
+    const { nodes } = useGLTF("models/spaceship/scene.gltf");
 
     return (
         <group {...props} dispose={null}>
@@ -84,4 +84,4 @@ function ShipModel({ ...props }) {
     );
 }
 
-useGLTF.preload("/models/spaceship/scene.gltf");
+useGLTF.preload("models/spaceship/scene.gltf");
