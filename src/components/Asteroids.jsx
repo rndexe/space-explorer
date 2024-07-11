@@ -6,72 +6,88 @@ Source: https://sketchfab.com/3d-models/asteroids-pack-rocky-version-adde1ecf129
 Title: Asteroids Pack (rocky version)
 */
 
-import { useLayoutEffect, useRef, useMemo } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useEffect, useRef } from "react";
 import { useGLTF } from "@react-three/drei";
-import { MathUtils, Matrix4, Object3D, Vector3 } from "three";
-
-const tmp = new Object3D();
-const m4 = new Matrix4();
+import { MathUtils, Object3D } from "three";
+import { useFrame } from "@react-three/fiber";
+import { mutation } from "../utils/stores";
+import { LEVEL_SIZE } from "../utils/constants";
 
 export function Asteroids({ count }) {
     const { nodes, materials } = useGLTF("models/asteroids/asteroids_pack_rocky_version.glb");
 
-    const ref = useRef();
+    const curRef = useRef();
+    const nextRef = useRef();
+    const curLevel = useRef(0);
 
-    const velocities = useMemo(() => {
-        let arr = [];
-        for (let i = 0; i < count; i++) {
-            arr.push(200 * MathUtils.randFloat(0.5, 1));
-        }
-
-        return arr;
-    }, [count]);
-    useLayoutEffect(() => {
-        for (let i = 0; i < count; i++) {
-            tmp.position.set(
-                MathUtils.randFloatSpread(2000.0),
-                MathUtils.randFloatSpread(500.0),
-                MathUtils.randFloat(0.0, -2000.0)
-            );
-            tmp.rotation.set(
-                MathUtils.randFloatSpread(4 * Math.PI),
-                MathUtils.randFloatSpread(4 * Math.PI),
-                MathUtils.randFloatSpread(4 * Math.PI)
-            );
-            tmp.scale.setScalar(MathUtils.randFloat(1, 15.0));
-            tmp.updateMatrix();
-            ref.current.setMatrixAt(i, tmp.matrix);
-        }
-
-        ref.current.instanceMatrix.needsUpdate = true;
+    useEffect(() => {
+        generateAsteroids(curRef.current, 0, count);
+        generateAsteroids(nextRef.current, 1, count);
     }, [count]);
 
-    useFrame((_, delta) => {
-        for (let i = 0; i < count; i++) {
-            ref.current.getMatrixAt(i, m4);
-            console.log(m4.elements[14]);
-            let zPos = m4.elements[14];
-
-            zPos += velocities[i] * delta;
-            if (zPos > 100) {
-                zPos = -2500;
-            }
-
-            m4.elements[14] = zPos;
-            ref.current.setMatrixAt(i, m4);
+    useFrame(() => {
+        if (mutation.level != curLevel.current) {
+            curLevel.current = mutation.level;
+            // console.log("Changing level now to", curLevel.current);
+            generateAsteroids(curLevel.current % 2 ? curRef.current : nextRef.current, curLevel.current + 1, count);
         }
-        ref.current.instanceMatrix.needsUpdate = true;
     });
 
     return (
-        <instancedMesh
-            ref={ref}
-            args={[null, null, count]}
-            geometry={nodes["Asteroid_no_1_Material_#3_0"].geometry}
-            material={materials.Material_3}
-        />
+        <>
+            <instancedMesh
+                ref={curRef}
+                args={[null, null, count]}
+                geometry={nodes["Asteroid_no_7_Material_#3_0"].geometry}
+                material={materials.Material_3}
+                // frustumCulled={false}
+            />
+            <instancedMesh
+                ref={nextRef}
+                args={[null, null, count]}
+                geometry={nodes["Asteroid_no_6_Material_#3_0"].geometry}
+                material={materials.Material_3}
+                // frustumCulled={false}
+            />
+            <fog attach="fog" args={["black", 0, LEVEL_SIZE * 0.875]} />
+        </>
     );
 }
+const generateAsteroids = (iMesh, level, count) => {
+    const zOffset = -1.0 * LEVEL_SIZE * level;
+    // console.log("Generating mesh from", zOffset, "to", -1.0 * LEVEL_SIZE + zOffset);
+    const tmp = new Object3D();
 
+    for (let i = 0; i < count; i++) {
+        tmp.position.set(
+            MathUtils.randFloatSpread(LEVEL_SIZE),
+            MathUtils.randFloatSpread(LEVEL_SIZE / 8),
+            MathUtils.randFloat(zOffset, -1.0 * LEVEL_SIZE + zOffset)
+        );
+        tmp.rotation.set(
+            MathUtils.randFloatSpread(4 * Math.PI),
+            MathUtils.randFloatSpread(4 * Math.PI),
+            MathUtils.randFloatSpread(4 * Math.PI)
+        );
+        tmp.scale.setScalar(generateGaussian(1, 10.0));
+        tmp.updateMatrix();
+
+        iMesh.setMatrixAt(i, tmp.matrix);
+    }
+
+    // Recalculate boundingsphere for the instanceMesh to update for camera frustum culling
+    iMesh.computeBoundingSphere();
+    iMesh.instanceMatrix.needsUpdate = true;
+};
+
+const generateGaussian = (mean, std) => {
+    const _2PI = Math.PI * 2;
+    const u1 = Math.random();
+    const u2 = Math.random();
+
+    const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(_2PI * u2);
+    const z1 = Math.sqrt(-2.0 * Math.log(u1)) * Math.sin(_2PI * u2);
+
+    return z0 * std + mean;
+};
 useGLTF.preload("models/asteroids/asteroids_pack_rocky_version.glb");

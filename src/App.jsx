@@ -1,23 +1,38 @@
 import { Canvas } from "@react-three/fiber";
-import { Loader, StatsGl } from "@react-three/drei";
+import { Environment, Loader, Stats, KeyboardControls } from "@react-three/drei";
+import { Perf } from "r3f-perf";
 import { SkyBox } from "./components/Skybox";
 import { Ship } from "./components/Ship";
 import { Asteroids } from "./components/Asteroids";
-import { Environment } from "@react-three/drei";
 
 export default function App() {
     return (
         <>
-            <Canvas camera={{ far: 2000 }}>
+            <Canvas>
+                {import.meta.env.DEV && <Perf minimal />}
                 <Environment preset="dawn" />
-                <directionalLight color="blue" intensity={2} position={[100, 100, 100]} />
+                <directionalLight color="blue" intensity={2} position={[-100, 100, 100]} />
                 <SkyBox />
-                <Asteroids count={100} />
-                <Ship />
-                <fog attach="fog" args={["black", 0, 2000]} />
-                {import.meta.env.DEV && <StatsGl />}
+                <KeyboardControls
+                    map={[
+                        { name: "up", keys: ["KeyW", "ArrowUp"] },
+                        { name: "down", keys: ["KeyS", "ArrowDown"] },
+                        { name: "left", keys: ["KeyA", "ArrowLeft"] },
+                        { name: "right", keys: ["KeyD", "ArrowRight"] },
+                        { name: "boost", keys: ["Space"] },
+                        { name: "shift", keys: ["ShiftLeft"] },
+                    ]}
+                >
+                    <Asteroids count={100} />
+                    <Ship />
+                </KeyboardControls>
             </Canvas>
-            <Loader />
+            {import.meta.env.DEV && (
+                <>
+                    <Loader />
+                    <Stats />
+                </>
+            )}
         </>
     );
 }
