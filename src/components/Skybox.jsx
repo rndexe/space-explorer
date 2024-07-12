@@ -5,7 +5,7 @@ export function SkyBox() {
     const scene = useThree((state) => state.scene);
 
     const e = new Euler();
-    useFrame(({ clock }, delta) => {
+    useFrame(({ clock }) => {
         // console.log(scene.background.rotation)
         scene.backgroundRotation.copy(e.set(clock.getElapsedTime() / 50, clock.getElapsedTime() / 50, 0));
     });
@@ -21,6 +21,6 @@ export function SkyBox() {
 
     scene.background = texture;
     //scene.backgroundBlurriness = 0;
-    scene.backgroundIntensity = 0.5;
+    scene.backgroundIntensity = 0.3;
     return null;
 }
